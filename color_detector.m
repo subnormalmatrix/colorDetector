@@ -22,7 +22,7 @@ function varargout = color_detector(varargin)
 
 % Edit the above text to modify the response to help color_detector
 
-% Last Modified by GUIDE v2.5 26-Jul-2021 22:32:05
+% Last Modified by GUIDE v2.5 29-Jul-2021 00:07:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -83,13 +83,14 @@ function listbox1_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from listbox1
 global rgbImage
 K = get(handles.listbox1, 'value');
+% individual bands
 red = rgbImage(:,:,1);
 green = rgbImage(:,:,2);
 blue = rgbImage(:,:,3);
 switch K
     case 2
         % color bands
-        % red
+        % threshold red
         redband = (red<=255 & red>180);
         greenband = (green<=120);
         blueband = (blue<=100);
@@ -141,26 +142,34 @@ switch K
        
 end
 
-axes(handles.axes2);
 if sum(det) == 0
     disp('Color not detected');
+    axes(handles.axes2);
+    imshow(rgb2gray(rgbImage));
+    axes(handles.axes3);
+    imshow(imoverlay(rgbImage, det, 'black'));
+    axes(handles.axes4);
     imshow(rgb2gray(rgbImage));
 else
     %image enhancement
     det_1 = imfill(det, 'holes');
     det_2 = bwmorph(det_1, 'dilate',3);
     detect = imfill(det_2, 'holes');
+    axes(handles.axes2);
+    imshow(detect);
     %highlight the image
-    %img_high = imoverlay(rgbImage,detect,'black');
+    axes(handles.axes3);
+    img_high = imoverlay(rgbImage,detect,'black');
+    imshow(img_high);
     detect = cast(detect, class(red));
     maskedImageR = detect .* red;
 	maskedImageG = detect .* green; 
 	maskedImageB = detect .* blue;
     maskedRGBImage = cat(3, maskedImageR, maskedImageG, maskedImageB);
+    axes(handles.axes4);
     imshow(maskedRGBImage);
-    %imshow(img_high)
+  
 end
-    
 
 
 % --- Executes during object creation, after setting all properties.
